@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شباب قادرون | القمة</title>
+    <style>
+        :root {
+            --primary: #ef233c;
+            --secondary: #d90429;
+            --dark: #1a1a1a;
+            --card-bg: #ffffff;
+            --text-main: #2b2d42;
+            --text-light: #8d99ae;
+            --gold: #ffb703;
+            --grad: linear-gradient(135deg, #ef233c 0%, #d90429 100%);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 70px;
+        }
+
+        .intro-screen {
+            background: var(--grad);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            margin-bottom: 20px;
+        }
+
+        .intro-screen h1 { margin: 0; font-size: 28px; }
+        .header {
+            background: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header .logo { font-weight: 900; color: var(--primary); font-size: 20px; }
+        .points-pill { background: var(--gold); color: #000; padding: 4px 12px; border-radius: 50px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+
+        .screen { display: none; padding: 15px; animation: slideUp 0.4s ease; }
+        .active { display: block; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
+        input, select, textarea { width: 100%; background: #f8f9fa; border: 2px solid #eee; padding: 12px 15px; margin: 10px 0; border-radius: 12px; outline: none; }
+        .btn { background: var(--grad); color: white; border: none; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .del-btn { background: #ff4d4d22; color: #ff4d4d; border: none; padding: 5px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; float: left; }
+
+        .navbar { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; padding: 10px 5px; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 1000; }
+        .nav-item { flex: 1; text-align: center; font-size: 24px; color: #ccc; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        .hidden { display: none; }
+
+        .profile-circle { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); margin-bottom: 10px; }
+        .post-author { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .news-img { width: 100%; border-radius: 15px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="appHeader" class="header hidden">
+        <div class="logo">قادرون 🦾</div>
+        <div class="points-pill"><span>🌟</span><span id="topBonus">0</span></div>
+    </div>
+
+    <div id="auth" class="screen active">
+        <div class="intro-screen"><h1>شباب قادرون</h1><p>منصة التميز والإبداع</p></div>
+        <div class="card" id="loginBox">
+            <h3 style="text-align:center">تسجيل الدخول</h3>
+            <input id="loginPhone" type="tel" placeholder="رقم الهاتف">
+            <input id="loginPass" type="password" placeholder="كلمة المرور">
+            <button class="btn" onclick="login()">دخول للمنصة</button>
+            <p style="text-align:center; font-size:14px; margin-top:20px;">عضو جديد؟ <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="showRegister()">سجل الآن</span></p>
+        </div>
+        <div class="card hidden" id="registerBox">
+            <h3 style="text-align:center">إنشاء حساب</h3>
+            <select id="regRole" onchange="toggleAdminKey()"><option value="member">عضو متطوع</option><option value="admin">مسؤول (Admin)</option></select>
+            <input id="adminKey" class="hidden" type="password" placeholder="كود المسؤول">
+            <input id="regName" placeholder="الاسم الثلاثي">
+            <input id="regPhone" type="tel" placeholder="رقم الهاتف">
+            <input id="regPass" type="password" placeholder="كلمة المرور">
+            <button class="btn" onclick="register()">تأكيد التسجيل</button>
+            <button class="btn btn-outline" style="margin-top:10px;" onclick="showLogin()">العودة</button>
+        </div>
+    </div>
+
+    <div id="home" class="screen">
+        <div id="postBox" class="card hidden">
+            <textarea id="newsText" placeholder="شاركنا خبراً جديداً..."></textarea>
+            <input type="file" id="newsImg" accept="image/*">
+            <button class="btn" onclick="addNews()">نشر الخبر</button>
+        </div>
+        <div id="newsFeed"></div>
+    </div>
+
+    <div id="adminPanel" class="screen">
+        <div class="card">
+            <h3>🎯 تعيين مهمة</h3>
+            <select id="taskUser"></select>
+            <input id="taskTitle" placeholder="ما هي المهمة؟">
+            <input id="taskBonus" type="number" placeholder="النقاط">
+            <button class="btn" onclick="giveTask()">إرسال المهمة</button>
+        </div>
+        <div class="card">
+            <h3>👥 إدارة الأعضاء</h3>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <div id="tasks" class="screen"><h2 style="padding-right:10px">مهامي</h2><div id="myTasks"></div></div>
+
+    <div id="media" class="screen">
+        <div class="card" style="text-align:center">
+            <h3>تواصل معنا</h3>
+            <button class="btn" style="background:#25D366; margin-bottom:12px;" onclick="window.open('https://chat.whatsapp.com/FtYFTJxnLER7K1qtunHFff')">واتساب</button>
+            <button class="btn" style="background:#1877F2;" onclick="window.open('https://www.facebook.com/qaderoon492')">فيسبوك</button>
+        </div>
+    </div>
+
+    <div id="profile" class="screen">
+        <div class="card" style="text-align:center">
+            <div style="position:relative; display:inline-block;">
+                <img id="profileImg" class="profile-circle" src="https://ui-avatars.com/api/?name=User">
+                <label for="updatePhoto" style="position:absolute; bottom:10px; right:0; background:var(--primary); color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid white;">📷</label>
+                <input type="file" id="updatePhoto" hidden accept="image/*" onchange="updateUserProfilePhoto(this)">
+            </div>
+            <h2 id="profileName"></h2>
+            <p id="profileRole"></p>
+            <div id="superAdminBadge" class="hidden" style="color:var(--gold); font-weight:bold; margin-bottom:10px;">👑 المدير العام</div>
+            <button class="btn btn-outline" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </div>
+
+    <div id="nav" class="navbar hidden">
+        <div class="nav-item" onclick="tab('home',this)">🏠</div>
+        <div class="nav-item hidden" id="tasksBtn" onclick="tab('tasks',this)">📋</div>
+        <div class="nav-item hidden" id="adminBtn" onclick="tab('adminPanel',this)">⚙️</div>
+        <div class="nav-item" onclick="tab('media',this)">📱</div>
+        <div class="nav-item" onclick="tab('profile',this)">👤</div>
+    </div>
+
+    <script>
+        const ADMIN_CODE = "2026can";
+        const SUPER_ADMIN = "01029887121"; // الرقم المتحكم بالكامل
+        
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        let news = JSON.parse(localStorage.getItem("news")) || [];
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        let currentUser = null;
+
+        function save() {
+            localStorage.setItem("users", JSON.stringify(users));
+            localStorage.setItem("news", JSON.stringify(news));
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+        }
+
+        function showRegister() { document.getElementById('loginBox').classList.add('hidden'); document.getElementById('registerBox').classList.remove('hidden'); }
+        function showLogin() { document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); }
+        function toggleAdminKey() { document.getElementById('adminKey').classList.toggle('hidden', document.getElementById('regRole').value !== "admin"); }
+
+        function register() {
+            const name = document.getElementById('regName').value, phone = document.getElementById('regPhone').value, pass = document.getElementById('regPass').value, role = document.getElementById('regRole').value, key = document.getElementById('adminKey').value;
+            if(!name || !phone || !pass) return alert("أكمل البيانات");
+            if(users.find(u => u.phone === phone)) return alert("هذا الرقم مسجل مسبقاً");
+            if(role === "admin" && key !== ADMIN_CODE) return alert("كود الأدمن خطأ");
+            
+            users.push({ name, phone, pass, role, bonus: 0, photo: "" });
+            save();
+            alert("تم التسجيل!");
+            showLogin();
+        }
+
+        function login() {
+            const p = document.getElementById('loginPhone').value, s = document.getElementById('loginPass').value, u = users.find(x => x.phone === p && x.pass === s);
+            if(!u) return alert("خطأ في البيانات");
+            currentUser = u;
+            
+            document.getElementById('auth').classList.remove('active');
+            document.querySelectorAll('.navbar, #appHeader').forEach(el => el.classList.remove('hidden'));
+            
+            if(u.role === "admin" || u.phone === SUPER_ADMIN) {
+                document.getElementById('adminBtn').classList.remove('hidden');
+                document.getElementById('postBox').classList.remove('hidden');
+            }
+            if(u.role !== "admin" || u.phone === SUPER_ADMIN) {
+                document.getElementById('tasksBtn').classList.remove('hidden');
+            }
+            
+            updateUI(); tab('home');
+        }
+
+        function updateUserProfilePhoto(input) {
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    currentUser.photo = e.target.result;
+                    let userIdx = users.findIndex(u => u.phone === currentUser.phone);
+                    users[userIdx].photo = e.target.result;
+                    save();
+                    updateUI();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('profileName').innerText = currentUser.name;
+            document.getElementById('profileRole').innerText = currentUser.phone === SUPER_ADMIN ? "المدير العام" : (currentUser.role === "admin" ? "مسؤول" : "متطوع");
+            document.getElementById('profileImg').src = currentUser.photo || "https://ui-avatars.com/api/?name="+currentUser.name;
+            document.getElementById('topBonus').innerText = currentUser.bonus;
+            document.getElementById('superAdminBadge').classList.toggle('hidden', currentUser.phone !== SUPER_ADMIN);
+            renderNews(); renderTasks();
+        }
+
+        function addNews() {
+            const txt = document.getElementById('newsText').value, img = document.getElementById('newsImg').files[0];
+            if(!txt) return;
+            let post = { id: Date.now(), author: currentUser.name, authorPhone: currentUser.phone, text: txt, img: "" };
+            const done = () => { news.unshift(post); save(); renderNews(); document.getElementById('newsText').value = ""; document.getElementById('newsImg').value = ""; };
+            if(img) { let r = new FileReader(); r.onload = e => { post.img = e.target.result; done(); }; r.readAsDataURL(img); } else done();
+        }
+
+        function renderNews() {
+            document.getElementById('newsFeed').innerHTML = news.map(n => `
+                <div class="card">
+                    <div class="post-author">
+                        <b>${n.author}</b>
+                        ${(currentUser.role==='admin' || currentUser.phone === SUPER_ADMIN) ? `<button class="del-btn" onclick="delNews(${n.id})">حذف</button>` : ''}
+                    </div>
+                    <p>${n.text}</p>
+                    ${n.img ? `<img src="${n.img}" class="news-img">` : ""}
+                </div>
+            `).join("");
+        }
+
+        function delNews(id) { if(confirm("حذف الخبر؟")) { news = news.filter(n => n.id !== id); save(); renderNews(); } }
+
+        function refreshAdmin() {
+            // المدير العام يرى الجميع، الأدمن يرى المتطوعين فقط
+            let list = (currentUser.phone === SUPER_ADMIN) ? users : users.filter(u => u.role !== 'admin');
+            
+            document.getElementById('taskUser').innerHTML = list.filter(u=>u.phone!==currentUser.phone).map(u=>`<option value="${u.phone}">${u.name}</option>`).join("");
+            document.getElementById('usersList').innerHTML = list.map(u => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee">
+                    <div>
+                        <b>${u.name}</b><br>
+                        <small>${u.role === 'admin' ? 'مسؤول' : 'متطوع'} | ${u.bonus} نقطة</small>
+                    </div>
+                    ${(u.phone !== currentUser.phone && u.phone !== SUPER_ADMIN) ? `<button class="del-btn" onclick="delUser('${u.phone}')">حذف</button>` : ''}
+                </div>
+            `).join("");
+        }
+
+        function delUser(p) { if(confirm("حذف هذا العضو نهائياً؟")) { users = users.filter(u=>u.phone!==p); save(); refreshAdmin(); } }
+
+        function giveTask() {
+            const t = document.getElementById('taskTitle').value, b = document.getElementById('taskBonus').value, u = document.getElementById('taskUser').value;
+            if(!t || !b) return alert("أدخل بيانات المهمة");
+            tasks.push({ id:Date.now(), target:u, title:t, bonus:parseInt(b), status:"pending" });
+            save(); alert("تم إرسال المهمة"); document.getElementById('taskTitle').value = "";
+        }
+
+        function renderTasks() {
+            const my = tasks.filter(t => t.target === currentUser.phone);
+            document.getElementById('myTasks').innerHTML = my.length ? my.map(t => `
+                <div class="card">
+                    <h4>${t.title}</h4>
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <span style="color:var(--gold); font-weight:bold">💰 ${t.bonus} نقطة</span>
+                        ${t.status==='pending' ? `<button class="btn" style="width:auto; padding:8px 20px" onclick="finishTask(${t.id})">تم التنفيذ</button>` : '✅ مكتملة'}
+                    </div>
+                </div>
+            `).join("") : "<p style='text-align:center'>لا يوجد مهام حالية</p>";
+        }
+
+        function finishTask(id) {
+            let t = tasks.find(x=>x.id===id); t.status = "done";
+            currentUser.bonus += t.bonus;
+            let userIdx = users.findIndex(u=>u.phone===currentUser.phone);
+            users[userIdx].bonus = currentUser.bonus;
+            save(); updateUI();
+        }
+
+        function tab(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            if(el) el.classList.add('active'); else document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if(id === 'adminPanel') refreshAdmin();
+        }
+
+        function logout() { location.reload(); }
+    </script>
+</body>
+</html>
